@@ -13,12 +13,12 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.awt.event.MouseWheelEvent;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
@@ -26,13 +26,13 @@ import java.awt.geom.RectangularShape;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
 import powerpaint.actions.PowerPaintColor;
@@ -75,18 +75,6 @@ public class PowerPaintDrawPanel extends JPanel
    * for some of the arrays used.
    */
   private static final int INDEX_FOUR = 4;
-  
-  /**
-   * This static Field is used to represent the JPanel
-   * width.
-   */
-  private static final int MY_PANEL_WIDTH = 1920;
-
-  /**
-   * This static Field is used to represent the JPanel
-   * height.
-   */
-  private static final int MY_PANEL_HIEGHT = 1080;
   
   /**
    * This static Field is used to represent the string
@@ -346,16 +334,27 @@ public class PowerPaintDrawPanel extends JPanel
    */
   private final GeneralPath my_draw_shape = new GeneralPath();
    
+
+  
+  private Image img;
+  
+  private double Scalar = 1.0;
+  private int translateX;
+  private int translateY;
+  private int width = 3825;
+  private int height = 3464;
+  private int newW;
+  private int newH;
+  private JPanel referenceToThis;
+  
+  
+  
   /**
    * Constructor used to create the JPanel used for drawing on.
    * This constructor sets the main size for the panel, sets
    * the color, and adds the mouse listeners to the panel
    * upon initialization.
    */
-  
-  private BufferedImage img;
-  
-  
   public PowerPaintDrawPanel() 
   {
     super();
@@ -363,12 +362,20 @@ public class PowerPaintDrawPanel extends JPanel
     this.setPreferredSize(new Dimension(screenSize.width, screenSize.height));
     // load the background image
     try {
-      img = ImageIO.read(new File("./chernarus.jpg"));
+    	//URL url = new URL("http://www.dayztv.com/map/chernarus-plus-high-res.jpg");
+    	File sourceimage = new File("src/images/chernarus.jpg");
+      img = ImageIO.read(sourceimage);
     } catch(IOException e) {
       e.printStackTrace();
     }
     this.addMouseListener(new MyMouseListener());
+    this.addMouseWheelListener(new MyMouseListener());
     this.addMouseMotionListener(new MyMouseMotionListener());
+    referenceToThis = this;
+    newW = (int)(width * Scalar);
+    newH = (int)(height * Scalar);
+	translateX = (this.getWidth() / 2) - (newW / 2);
+	translateY = (this.getHeight() / 2) - (newH / 2);
   }
   
   /**
@@ -383,7 +390,11 @@ public class PowerPaintDrawPanel extends JPanel
   public void paintComponent(final Graphics the_graphics) 
   {
     super.paintComponent(the_graphics);
-    the_graphics.drawImage(img, -500, -500, this);
+    ((Graphics2D) the_graphics).setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+            RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+    
+    //Now lets Draw the map
+    the_graphics.drawImage(img, translateX, translateY, newW, newH, null);
 
 
     final Graphics2D graphics2d = (Graphics2D) the_graphics;
@@ -863,6 +874,31 @@ public class PowerPaintDrawPanel extends JPanel
       }
       my_currently_drawing = true;
     }
+    
+    @Override
+    public void mouseWheelMoved(final MouseWheelEvent the_event)
+    {
+    	int scrollCount = the_event.getWheelRotation();
+        my_current_x = the_event.getX();
+        my_current_y = the_event.getY();
+    	if(scrollCount > 0) { 
+    		if(Scalar < 2) {
+            	Scalar += scrollCount * 0.03;
+    		}
+    	} else {
+    		if(Scalar > 0.1) {
+            	Scalar += scrollCount * 0.03;
+    		}
+    	}
+        newW = (int)(width * Scalar);
+        newH = (int)(height * Scalar);
+    	translateX = (referenceToThis.getWidth() / 2) - (newW / 2);
+    	translateY = (referenceToThis.getHeight() / 2) - (newH / 2);
+    	//translateX = (my_current_x + (newW / 2));
+    	//translateY = (my_current_y + (newH / 2));
+    	repaint();
+    }
+    
     
     /**
      * When the mouse is released this Listener will set the
