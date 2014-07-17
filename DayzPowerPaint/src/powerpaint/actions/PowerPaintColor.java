@@ -29,7 +29,7 @@ public class PowerPaintColor extends AbstractAction
    * This static Field is used to hold the object of the
    * currently selected color.
    */
-  private static Color my_selected_color = Color.ORANGE;
+  private static Color my_selected_color;
   
   /**
    * This static Field is used to avoid magic numbers.
@@ -63,6 +63,11 @@ public class PowerPaintColor extends AbstractAction
   private final Color my_black_holder = new Color(0, 0, 0);
   
   /**
+   * This Field is used to hold the value for the Brigh Green.
+   */
+  private final Color my_green_holder = new Color(0, 255, 0);
+  
+  /**
    * Constructor used to create the Paint Color Object. It calls to its super class
    * passing in the text "Color" and the Icon chosen for the color button.
    * It then sets up the mnemonics for the button along with whether
@@ -76,7 +81,9 @@ public class PowerPaintColor extends AbstractAction
                          final String the_description, 
                          final Integer the_mnemonic) 
   {
+
     super(the_text, the_icon);
+	  my_selected_color = my_green_holder;
     putValue(SHORT_DESCRIPTION, the_description);
     putValue(MNEMONIC_KEY, the_mnemonic);
     putValue(SELECTED_KEY, false);

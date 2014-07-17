@@ -67,7 +67,7 @@ public final class PowerPaintToolBar extends JToolBar
   }
   
   /**
-   * Primary method to create setup the various tool bar items
+   * Primary method to create and setup the various tool bar items
    * including adding the Action to the tool bar item.
    * @param the_action Action passed in to add to the tool bar item.
    */
