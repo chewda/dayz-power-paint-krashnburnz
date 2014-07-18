@@ -19,6 +19,13 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JToolBar;
+
+import powerpaint.actions.Destination;
+import powerpaint.actions.Friendly;
+import powerpaint.actions.Player;
+import powerpaint.actions.DragMap;
+import powerpaint.actions.Enemy;
+import powerpaint.actions.Groups;
 import powerpaint.actions.PowerPaintColor;
 import powerpaint.actions.PowerPaintEllipseDraw;
 import powerpaint.actions.PowerPaintLineDraw;
@@ -54,7 +61,64 @@ public class PowerPaintGui extends JFrame
    * This static Field is used to hold which tool is currently
    * selected. The default value is the pencil tool.
    */
-  private static String my_selected_tool = MY_PENCIL_STRING;
+  private static String my_selected_tool = "Drag";
+  
+  /**
+   * This Field is used to create and hold the Action Object for 
+   * the Destination Icon placeable on the Dayz Map.
+   */
+  private final Action my_group_action = new Groups("Group", 
+          new ImageIcon(getClass().getResource("/images/group_icon.png")),  
+          "Tool used to place a Group icon on the map.", 
+           Integer.valueOf(KeyEvent.VK_O));
+
+  /**
+   * This Field is used to create and hold the Action Object for 
+   * the Destination Icon placeable on the Dayz Map.
+   */
+  private final Action my_enemy_action = new Enemy("Enemy", 
+          new ImageIcon(getClass().getResource("/images/lz_enemy_icon_small.png")),  
+          "Tool used to place a Enemy icon on the map.", 
+           Integer.valueOf(KeyEvent.VK_M));
+  
+  
+  
+  /**
+   * This Field is used to create and hold the Action Object for 
+   * the Destination Icon placeable on the Dayz Map.
+   */
+  private final Action my_destination_action = new Destination("Destination", 
+          new ImageIcon(getClass().getResource("/images/destination_small.png")),  
+          "Tool used to place a destination icon on the map.", 
+           Integer.valueOf(KeyEvent.VK_N));
+  
+  /**
+   * This Field is used to create and hold the Action Object for 
+   * the Frienbdly Icon placeable on the Dayz Map.
+   */
+  private final Action my_friendly_action = new Friendly("Friendly", 
+          new ImageIcon(getClass().getResource("/images/lz_small.png")),  
+          "Tool used to place a friendly icon on the map.", 
+           Integer.valueOf(KeyEvent.VK_I));
+  
+  
+  /**
+   * This Field is used to create and hold the Action Object for 
+   * the DayzGuy icon placeable on the Dayz Map.
+   */
+  private final Action my_player_action = new Player("Player", 
+          new ImageIcon(getClass().getResource("/images/player_icon.png")),  
+          "Tool used to place the player's location.", 
+           Integer.valueOf(KeyEvent.VK_Y));
+  
+  /**
+   * This Field is used to create and hold the Action Object for 
+   * the Paint Color chooser tool.
+   */
+  private final Action my_drag_action = new DragMap("Drag", 
+          new ImageIcon(getClass().getResource("/images/pointer.png")),  
+          "Tool used to drag the map.", 
+           Integer.valueOf(KeyEvent.VK_D));
   
   /**
    * This Field is used to create and hold the Action Object for 
@@ -79,7 +143,7 @@ public class PowerPaintGui extends JFrame
   private final Action my_ellipse_action = new PowerPaintEllipseDraw("Ellipse", 
                 new ImageIcon(getClass().getResource("/images/ellipse_bw.gif")),  
                 "Ellipse tool used to draw an elliptical shape.", 
-                Integer.valueOf(KeyEvent.VK_E));
+                Integer.valueOf(KeyEvent.VK_S));
      
   /**
    * This Field is used to create and hold the Action Object for 
@@ -207,7 +271,15 @@ public class PowerPaintGui extends JFrame
     PowerPaintMenuBar.setupToolMenu(my_pencil_action, KeyEvent.VK_P);
     PowerPaintMenuBar.setupToolMenu(my_linedraw_action, KeyEvent.VK_L);
     PowerPaintMenuBar.setupToolMenu(my_rectangle_action, KeyEvent.VK_R);
-    PowerPaintMenuBar.setupToolMenu(my_ellipse_action, KeyEvent.VK_E);
+    PowerPaintMenuBar.setupToolMenu(my_ellipse_action, KeyEvent.VK_S);
+    PowerPaintMenuBar.setupToolMenu(my_player_action, KeyEvent.VK_Y);
+    PowerPaintMenuBar.setupToolMenu(my_group_action, KeyEvent.VK_O);
+    PowerPaintMenuBar.setupToolMenu(my_destination_action, KeyEvent.VK_N);
+    PowerPaintMenuBar.setupToolMenu(my_enemy_action, KeyEvent.VK_M);
+    PowerPaintMenuBar.setupToolMenu(my_friendly_action, KeyEvent.VK_I);
+    PowerPaintMenuBar.setupToolMenu(my_drag_action, KeyEvent.VK_D);
+
+
     
     //setup tool bar fully
     PowerPaintToolBar.setupToolBarMenu(my_color_action);    
@@ -215,6 +287,14 @@ public class PowerPaintGui extends JFrame
     PowerPaintToolBar.setupToolBarMenu(my_linedraw_action);
     PowerPaintToolBar.setupToolBarMenu(my_rectangle_action);
     PowerPaintToolBar.setupToolBarMenu(my_ellipse_action);
+    PowerPaintToolBar.setupToolBarMenu(my_player_action);
+    PowerPaintToolBar.setupToolBarMenu(my_group_action);
+    PowerPaintToolBar.setupToolBarMenu(my_destination_action);
+    PowerPaintToolBar.setupToolBarMenu(my_friendly_action);
+    PowerPaintToolBar.setupToolBarMenu(my_enemy_action);
+    PowerPaintToolBar.setupToolBarMenu(my_drag_action);
+
+  
   }
 
   /**
