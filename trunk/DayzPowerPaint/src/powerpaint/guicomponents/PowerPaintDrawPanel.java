@@ -23,13 +23,12 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RectangularShape;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
@@ -345,8 +344,12 @@ public class PowerPaintDrawPanel extends JPanel
   private int height = 3464;
   private int newW;
   private int newH;
-  private JPanel referenceToThis;
+  private int my_drag_start_x;
+  private int my_drag_start_y;
   
+
+  
+  private List<CanvasImage> picturesToDrawList;
   
   
   /**
@@ -358,12 +361,12 @@ public class PowerPaintDrawPanel extends JPanel
   public PowerPaintDrawPanel() 
   {
     super();
+    picturesToDrawList = new ArrayList<CanvasImage>();
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     this.setPreferredSize(new Dimension(screenSize.width, screenSize.height));
     // load the background image
     try {
-    	//URL url = new URL("http://www.dayztv.com/map/chernarus-plus-high-res.jpg");
-    	File sourceimage = new File("src/images/chernarus.jpg");
+    	File sourceimage = new File("src/images/chernarus_xlarge_updated_ver1.png");
       img = ImageIO.read(sourceimage);
     } catch(IOException e) {
       e.printStackTrace();
@@ -371,7 +374,6 @@ public class PowerPaintDrawPanel extends JPanel
     this.addMouseListener(new MyMouseListener());
     this.addMouseWheelListener(new MyMouseListener());
     this.addMouseMotionListener(new MyMouseMotionListener());
-    referenceToThis = this;
     newW = (int)(width * Scalar);
     newH = (int)(height * Scalar);
 	translateX = (this.getWidth() / 2) - (newW / 2);
@@ -422,6 +424,37 @@ public class PowerPaintDrawPanel extends JPanel
       }
       graphics2d.setStroke(new BasicStroke(my_brush_thickness));
       my_grid_array.clear();
+    }
+
+    if(!picturesToDrawList.isEmpty()) {
+    	String thefilePath;
+        ListIterator<CanvasImage> litr = picturesToDrawList.listIterator();
+        while(litr.hasNext()) {
+        	CanvasImage temp = litr.next();
+        	if(temp.getType() == 1) {
+        		thefilePath = "src/images/player_large.png";
+        	} else if(temp.getType() == 2) {
+        		thefilePath = "src/images/destination_large.png";
+        	} else if(temp.getType() == 3) {
+        		thefilePath = "src/images/enemy_large.png";
+        	} else if(temp.getType() == 4) {
+        		thefilePath = "src/images/group_large.png";
+        	} else if(temp.getType() == 5) {
+         		thefilePath = "src/images/friendly.png";
+         	}else {
+        		thefilePath = "src/images/error_large.png";
+        	}
+        	File sourceimage = new File(thefilePath);
+        	Image canvasImage = null;
+            try {
+            	canvasImage = ImageIO.read(sourceimage);
+            	the_graphics.drawImage(canvasImage, temp.getX(), temp.getY(), null);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+            
+        }
     }
     
   }
@@ -724,6 +757,7 @@ public class PowerPaintDrawPanel extends JPanel
     my_pencil_thickness_map.clear();
     my_line_thickness_map.clear();
     clearCoordinates();
+    picturesToDrawList.clear();
     repaint();
   }
   
@@ -839,8 +873,15 @@ public class PowerPaintDrawPanel extends JPanel
       my_previous_y = my_new_y;
       my_current_x = the_event.getX();
       my_current_y = the_event.getY();
+      if (PowerPaintGui.getSelectedTool().equals("Drag")) {
+          translateX -= my_drag_start_x - my_current_x;
+          translateY -= my_drag_start_y - my_current_y;
+          my_drag_start_x = my_current_x;
+          my_drag_start_y = my_current_y;
+      }
       my_new_x = my_current_x;
       my_new_y = my_current_y;
+
       repaint();    
     }
   }
@@ -871,6 +912,9 @@ public class PowerPaintDrawPanel extends JPanel
         my_new_x = my_start_x;
         my_new_y = my_start_y;
         my_draw_shape.reset();
+      } else if(PowerPaintGui.getSelectedTool().equals("Drag")) {
+    	  my_drag_start_x = the_event.getX();
+    	  my_drag_start_y = the_event.getY();
       }
       my_currently_drawing = true;
     }
@@ -878,24 +922,30 @@ public class PowerPaintDrawPanel extends JPanel
     @Override
     public void mouseWheelMoved(final MouseWheelEvent the_event)
     {
-    	int scrollCount = the_event.getWheelRotation();
+    	int scrollCount = -(the_event.getWheelRotation());
         my_current_x = the_event.getX();
         my_current_y = the_event.getY();
-    	if(scrollCount > 0) { 
+    	if(scrollCount > 0.1) { 
     		if(Scalar < 2) {
             	Scalar += scrollCount * 0.03;
+            	translateX -= 65;
+            	translateY -= 75;
     		}
     	} else {
     		if(Scalar > 0.1) {
             	Scalar += scrollCount * 0.03;
+            	translateX += 65;
+            	translateY += 75;
     		}
     	}
+    	
         newW = (int)(width * Scalar);
         newH = (int)(height * Scalar);
-    	translateX = (referenceToThis.getWidth() / 2) - (newW / 2);
-    	translateY = (referenceToThis.getHeight() / 2) - (newH / 2);
-    	//translateX = (my_current_x + (newW / 2));
-    	//translateY = (my_current_y + (newH / 2));
+        
+    	//translateX = (referenceToThis.getWidth() / 2) - (newW / 2);
+    	//translateY = (referenceToThis.getHeight() / 2) - (newH / 2);
+    	//translateX = (referenceToThis.getWidth() / 2) - (my_current_x + (newW / 2));
+    	//translateY = (referenceToThis.getHeight() / 2) - (my_current_y + (newH / 2));
     	repaint();
     }
     
@@ -941,6 +991,27 @@ public class PowerPaintDrawPanel extends JPanel
         my_shapes_array.add(rectangle_shape);
         my_shapes_map.put(rectangle_shape, PowerPaintColor.getColor());
         my_shapes_thickness_map.put(rectangle_shape, my_brush_thickness);
+        
+        //1 = Player, 2 = Destination, 3 = Enemy, 4 = Group , 5 = friendly
+      } else if(PowerPaintGui.getSelectedTool().equals("Destination") ||
+    		  PowerPaintGui.getSelectedTool().equals("Enemy") ||
+    		  PowerPaintGui.getSelectedTool().equals("Group") ||
+    		  PowerPaintGui.getSelectedTool().equals("Friendly") ||
+    		  PowerPaintGui.getSelectedTool().equals("Player")) {
+    	  int type;
+    	  if(PowerPaintGui.getSelectedTool().equals("Player")) {
+    		  type = 1;
+    	  } else if(PowerPaintGui.getSelectedTool().equals("Destination")) {
+    		  type = 2;
+    	  } else if(PowerPaintGui.getSelectedTool().equals("Enemy")) {
+    		  type = 3;
+    	  } else if(PowerPaintGui.getSelectedTool().equals("Friendly")) {
+    		  type = 5;
+    	  }else { //default is group
+    		  type = 4;
+    	  }
+    	  picturesToDrawList.add(new CanvasImage(type, the_event.getX()-35, the_event.getY()-35));
+    	  
       }
       else
       {
@@ -956,5 +1027,6 @@ public class PowerPaintDrawPanel extends JPanel
       my_last_tool_type.add(PowerPaintGui.getSelectedTool());
       PowerPaintGui.changeEditMenuItemAvailable("undo", true);
     }
+    
   }
 }
